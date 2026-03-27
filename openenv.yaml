@@ -1,0 +1,30 @@
+name: hospital-resource-env
+version: 1.0
+
+description: AI environment for hospital resource allocation and patient prioritization.
+
+observation_space:
+  type: dict
+  fields:
+    available_beds: int
+    available_doctors: int
+    patients: list
+    time_step: int
+
+action_space:
+  type: discrete
+  size: 3
+  actions:
+    0: assign_highest_severity
+    1: assign_longest_waiting
+    2: wait
+
+tasks:
+  - name: easy
+    description: fewer patients, more resources
+
+  - name: medium
+    description: balanced difficulty
+
+  - name: hard
+    description: high load, limited resources
