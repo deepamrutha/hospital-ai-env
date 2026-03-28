@@ -1,36 +1,38 @@
-import gradio as gr
+from fastapi import FastAPI
 from hospital_env import HospitalEnv
 from baseline_agent import baseline_policy
 
+app = FastAPI()
+
+# initialize env
 env = HospitalEnv("medium")
 state = env.reset()
 
-def step_env():
-    global state
-    action = baseline_policy(state)
-    state, reward, done, _ = env.step(action)
 
-    return f"""
-State: {state}
+@app.get("/")
+def home():
+    return {"message": "Hospital AI Environment Running"}
 
-Reward: {reward}
-Done: {done}
-"""
 
+@app.post("/reset")
 def reset_env():
     global state
     state = env.reset()
-    return "Environment Reset!"
+    return {
+        "message": "Environment Reset",
+        "state": state
+    }
 
-with gr.Blocks() as demo:
-    gr.Markdown("# 🏥 Hospital AI Environment")
 
-    output = gr.Textbox(label="Output")
+@app.post("/step")
+def step_env():
+    global state
 
-    step_btn = gr.Button("Step")
-    reset_btn = gr.Button("Reset")
+    action = baseline_policy(state)
+    state, reward, done, _ = env.step(action)
 
-    step_btn.click(step_env, outputs=output)
-    reset_btn.click(reset_env, outputs=output)
-
-demo.launch()
+    return {
+        "state": state,
+        "reward": reward,
+        "done": done
+    }
