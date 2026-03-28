@@ -32,22 +32,22 @@ class HospitalEnv:
     # 👀 STATE
     def _get_state(self):
         return {
-            "available_beds": self.available_beds,
-            "available_doctors": self.available_doctors,
+            "available_beds": int(self.available_beds),
+            "available_doctors": int(self.available_doctors),
             "patients": self.patients,
-            "time_step": self.time_step
+            "time_step": int(self.time_step)
         }
 
     # 🧑‍⚕️ GENERATE PATIENT
     def _generate_patient(self):
         return {
-            "severity": random.randint(1, 10),
-            "wait_time": 0
+            "severity": int(random.randint(1, 10)),
+            "wait_time": int(0)
         }
 
     # 🎮 STEP FUNCTION
     def step(self, action):
-        reward = 0
+        reward = 0.0
         treated_patient = None
 
         # 👉 ACTIONS
@@ -62,7 +62,7 @@ class HospitalEnv:
                 treated_patient = patient
 
         elif action == 2:  # wait
-            reward -= 2
+            reward -= 2.0
 
         # 👉 TREAT PATIENT
         if treated_patient:
@@ -70,21 +70,21 @@ class HospitalEnv:
             self.available_beds -= 1
 
             if treated_patient["severity"] >= 8:
-                reward += 10
+                reward += 10.0
             else:
-                reward += 5
+                reward += 5.0
 
         # 👉 UPDATE WAIT TIMES
         for patient in self.patients:
             patient["wait_time"] += 1
 
             if patient["wait_time"] > 10:
-                reward -= 5
+                reward -= 5.0
 
             if patient["severity"] >= 8 and patient["wait_time"] > 5:
-                reward -= 15
+                reward -= 15.0
 
-        # 👉 ADD NEW PATIENTS (dynamic system)
+        # 👉 ADD NEW PATIENTS
         if random.random() < 0.3:
             self.patients.append(self._generate_patient())
 
@@ -93,4 +93,10 @@ class HospitalEnv:
 
         done = self.time_step >= self.max_steps
 
-        return self._get_state(), reward, done, {}
+        # ✅ VERY IMPORTANT: JSON SAFE OUTPUT
+        return (
+            self._get_state(),
+            float(reward),
+            bool(done),
+            {}
+        )
